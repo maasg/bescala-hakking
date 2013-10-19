@@ -40,6 +40,7 @@ object Processor {
 
   private def findMatchingQuotes(geometricObject: GeometricObject, offers: Map[Int, List[GeometricObjectQuote]]): Option[(Int, GeometricObjectQuote)] = {
 
+	val xpreSelectionMap = offers.filter{case (offerId,quote) => quote.contains(geometricObject)}.map{case (offer,quote)=> (offer,geometricObject)}.toList	  
     // reduce map to contain only matches
     val preSelectionMap = for {
         (offerId, quotes) <- offers
@@ -79,14 +80,18 @@ case class Result(selection: List[GeometricObjectQuote] = List(),
   val totalPrice = totalSelectionPrice + totalRestPrice
 
   def print(f: (String) => Unit) : Unit = {
-    f(s"total price $totalPrice")
-
-    f(s"total selection $totalSelectionPrice")
-    f(s"selection size ${selection.size}")
-
-    f(s"total rest $totalRestPrice")
-    f(s"rest size ${rest.size}")
-
-    f(s"offers is ${offersMap.keys.mkString(", ")}")
+    f(
+      s"""
+        |Result {
+        | totalPrice:         $totalPrice
+        | totalSize:          ${selection.size + rest.size}
+        |
+        | totalSelection:     $totalSelectionPrice
+        | totalSelectionSize: ${selection.size}
+        |
+        | totalRest:          $totalRestPrice
+        | totalRestSize:      ${rest.size}
+        |}
+      """.stripMargin)
   }
 }
