@@ -1,9 +1,18 @@
 package models
 
-class Quote[T](item:T, price:Double)
+trait Tradeable {
+}
 
-class Demand[T](items: List[T])
+case class Quote(item:Tradeable, price:Double) {
+  def matches(otherItem:Tradeable) = item == otherItem
+}
 
-case class Offer[T](index:Int, quotes: List[Quote[T]])
+case class Demand(items: List[Tradeable])
 
-case class BusinessCase[T](demand:Demand[T], offer:Offer[T])
+case class Offer(index:Int, quotes: List[Quote]) {
+  def matches(item:Tradeable) = quotes.exists(quote => quote.matches(item))
+}
+
+case class SupplyDemand(demand:Demand, offers:List[Offer])
+
+case class PurchaseOrder(offers:List[Offer])
