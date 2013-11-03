@@ -1,38 +1,29 @@
 package actors
 
-import scala.collection.Map
 import akka.actor.Actor
 import utils.Processor._
 import utils.Result
-import models.GeometricObject
-import models.{SupplyDemand, Demand, Offer,Tradeable}
-import akka.actor.ActorRef
+import models.{GeometricObject, Offer, Demand}
+import models.SupplyDemand
 
-class OfferProcessor(poProcessor:ActorRef) extends Actor {
 
+
+class OfferProcessor extends Actor {
+  
   def receive = {
-    case SupplyDemand(demand,offers) => 
-      val offersPerItem = matchOffersPerItem(demand,offers)
-      // if we cannot fullfil an item from our list, we can't proceed with ordering
-      if (offersPerItem.exists{case (k,v) => v==Nil}) poProcessor ! POProcessor.InsufficientOffer else {
-        val offerCombinations = combineLists(offersPerItem.values.toList)
-        offerCombinations.foreach(offerComb => offerProcessor ! offerComb)
-      }
+    case SupplyDemand(demand, offers)  => 
+      val value  = calculateOffer(demand, offers)
+      sender ! calculateOffer(demand, offers)
   }
-
-  def matchOffersPerItem(demand: Demand, offers: List[Offer]):Map[Tradeable,List[Offer]] = {
-    demand.items.map(item => item -> offers.filter(_.matches(item))).toMap
-  }
-  
-  def combineLists[T](l:List[List[T]]):List[List[T]] = {
-  	l match {
-  	  case Nil => Nil
-  	  case l1::Nil => List(l1)
-  	  case l1::l2::Nil => l1.flatMap(x=>l2.map(y=>List(x,y)))
-  	  case l1::t => l1.flatMap(x=>combineLists(t).map(y=>x::y))
-  	}
-  } 
-  
   
 }
 
+object OfferProcessor {
+	case class Request(demand: Demand, offers: List[Offer]) 
+	
+	def calculateOffer(demand: Demand, offer: List[Offer]) : Option[Double] = {
+	  val itemizedOffer = offer.flatMap(x=>x.quotes)
+	  
+	}
+	
+}

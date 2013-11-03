@@ -9,8 +9,7 @@ import akka.pattern.ask
 import models.RepositorySmall
 import akka.util.Timeout
 import utils.Result
-import actors.ProcessorActor
-import actors.Request
+import actors.OffersProcessor
 import scala.concurrent.Await
 import akka.pattern.ask
 import akka.util.Timeout
@@ -27,7 +26,7 @@ object ProcessorMain {
     implicit val timeout = Timeout(5 seconds)
     
     val system = ActorSystem("Processor")
-    val actor = system.actorOf(Props[ProcessorActor], "ProcessorActor")
+    val actor = system.actorOf(Props[OffersProcessor], "OfferProcessor")
     val futureResult = actor ? Request(RepositoryBig.demand, RepositoryBig.offers)
     val result = Await.result(futureResult, timeout.duration).asInstanceOf[Option[Result]]
     println(" *** Results:")
